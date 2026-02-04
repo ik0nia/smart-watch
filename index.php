@@ -76,6 +76,10 @@ h2{margin-top:0}
 small{color:#667}
 table{border-collapse:collapse}
 th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px}
+.topbar h1{font-size:20px;margin:0}
+.btn{display:inline-block;padding:8px 12px;border-radius:8px;background:#1976d2;color:#fff;text-decoration:none;font-weight:600}
+.btn:visited{color:#fff}
 .latest{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin:6px 0 10px}
 .latest .value{font-size:26px;font-weight:700}
 .latest .label{font-size:12px;color:#667;text-transform:uppercase;letter-spacing:.04em}
@@ -83,16 +87,23 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .chart-wrap{position:relative;width:100%;height:220px;max-height:220px}
 .chart{display:block;width:100% !important;height:100% !important}
-@media (max-width: 720px){
+@media (max-width: 900px){
   body{padding:12px}
   .grid{grid-template-columns:1fr;gap:12px}
   .card{padding:14px}
   h2{font-size:18px}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .topbar h1{font-size:18px}
   th,td{padding:6px}
   .latest .value{font-size:22px}
   .chart-wrap{height:180px;max-height:180px}
 }
 </style></head><body>
+
+<div class=topbar>
+  <h1>ReachFar V48</h1>
+  <a class=btn href="device_settings.php">Setari dispozitiv</a>
+</div>
 
 <div class=grid>
   <div class=card>
