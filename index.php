@@ -58,7 +58,9 @@ function normalize_rows($rows, $valueKeys, $maxRows = null){
 $bpmSeries = normalize_rows($bpm, ['bpm'], 120);
 $battSeries = normalize_rows($batt, ['battery'], 120);
 $bpSeries = normalize_rows($bp, ['sys','dia','bpm']);
+$lastBpm = $bpmSeries ? end($bpmSeries) : null;
 $lastBatt = $battSeries ? end($battSeries) : null;
+$lastBp = $bpSeries ? end($bpSeries) : null;
 $bpTable = array_slice(array_reverse($bpSeries), 0, 10);
 ?><!doctype html><html><head><meta charset=utf-8>
 <title>ReachFar V48 — Dashboard</title>
@@ -71,6 +73,21 @@ h2{margin-top:0}
 small{color:#667}
 table{border-collapse:collapse}
 th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.latest{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin:6px 0 10px}
+.latest .value{font-size:26px;font-weight:700}
+.latest .label{font-size:12px;color:#667;text-transform:uppercase;letter-spacing:.04em}
+.latest .time{font-size:12px;color:#667}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chart{width:100%;height:220px}
+@media (max-width: 720px){
+  body{padding:12px}
+  .grid{grid-template-columns:1fr;gap:12px}
+  .card{padding:14px}
+  h2{font-size:18px}
+  th,td{padding:6px}
+  .latest .value{font-size:22px}
+  .chart{height:180px}
+}
 </style></head><body>
 
 <div class=grid>
@@ -87,24 +104,60 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
     <?php endif ?>
   </div>
 
-  <div class=card><h2>❤️ BPM</h2><canvas id=bpm></canvas></div>
+  <div class=card>
+    <h2>❤️ BPM</h2>
+    <?php if($lastBpm): ?>
+      <div class=latest>
+        <div>
+          <div class=label>Ultimul BPM</div>
+          <div class=value><?= (int)$lastBpm['bpm'] ?></div>
+        </div>
+        <div class=time><?= htmlspecialchars($lastBpm['time']) ?></div>
+      </div>
+    <?php endif ?>
+    <canvas id=bpm class=chart></canvas>
+  </div>
 
   <div class=card><h2>🔋 Baterie</h2>
-    <canvas id=batt></canvas>
     <?php if($lastBatt): ?>
-      <div style="margin-top:10px"><small>Ultima: <?=$lastBatt['battery']?>% (<?=$lastBatt['time']?>)</small></div>
+      <div class=latest>
+        <div>
+          <div class=label>Ultima baterie</div>
+          <div class=value><?= (int)$lastBatt['battery'] ?>%</div>
+        </div>
+        <div class=time><?= htmlspecialchars($lastBatt['time']) ?></div>
+      </div>
+    <?php endif ?>
+    <canvas id=batt class=chart></canvas>
+    <?php if($lastBatt): ?>
+      <div style="margin-top:6px"><small>Ultima: <?=$lastBatt['battery']?>% (<?=$lastBatt['time']?>)</small></div>
     <?php endif ?>
   </div>
 </div>
 
 <div class=card style="margin-top:20px">
   <h2>🩸 Tensiune</h2>
-  <table width=100%>
-    <tr><th>Data</th><th>SYS</th><th>DIA</th><th>BPM</th></tr>
-    <?php foreach($bpTable as $r): ?>
-      <tr><td><?=$r['time']?></td><td><?=$r['sys']?></td><td><?=$r['dia']?></td><td><?=$r['bpm']?></td></tr>
-    <?php endforeach ?>
-  </table>
+  <?php if($lastBp): ?>
+    <div class=latest>
+      <div>
+        <div class=label>Ultima tensiune</div>
+        <div class=value><?= (int)$lastBp['sys'] ?>/<?= (int)$lastBp['dia'] ?></div>
+      </div>
+      <div>
+        <div class=label>BPM</div>
+        <div class=value><?= $lastBp['bpm'] !== null ? (int)$lastBp['bpm'] : 'N/A' ?></div>
+      </div>
+      <div class=time><?= htmlspecialchars($lastBp['time']) ?></div>
+    </div>
+  <?php endif ?>
+  <div class=table-wrap>
+    <table width=100%>
+      <tr><th>Data</th><th>SYS</th><th>DIA</th><th>BPM</th></tr>
+      <?php foreach($bpTable as $r): ?>
+        <tr><td><?=$r['time']?></td><td><?=$r['sys']?></td><td><?=$r['dia']?></td><td><?=$r['bpm']?></td></tr>
+      <?php endforeach ?>
+    </table>
+  </div>
 </div>
 
 <div class=card style="margin-top:20px">
@@ -134,7 +187,7 @@ const elBatt = document.getElementById('batt');
 if (elBpm) {
   new Chart(elBpm, {
     type: 'line',
-    options: { spanGaps: true, scales: { x: { ticks: { maxTicksLimit: 6 } } } },
+    options: { responsive: true, maintainAspectRatio: false, spanGaps: true, scales: { x: { ticks: { maxTicksLimit: 6 } } } },
     data: {
       labels: <?=json_encode(array_column($bpmSeries,'time'))?>,
       datasets: [{ label: 'BPM', data: <?=json_encode(array_column($bpmSeries,'bpm'))?>, tension: .3 }]
@@ -145,7 +198,7 @@ if (elBpm) {
 if (elBatt) {
   new Chart(elBatt, {
     type: 'line',
-    options: { spanGaps: true, scales: { x: { ticks: { maxTicksLimit: 6 } } } },
+    options: { responsive: true, maintainAspectRatio: false, spanGaps: true, scales: { x: { ticks: { maxTicksLimit: 6 } } } },
     data: {
       labels: <?=json_encode(array_column($battSeries,'time'))?>,
       datasets: [{ label: 'Battery %', data: <?=json_encode(array_column($battSeries,'battery'))?>, tension: .3 }]
