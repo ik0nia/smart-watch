@@ -1,13 +1,9 @@
 <?php
 $bpm=json_decode(@file_get_contents('data/bpm.json'),true)?:[];
 $bp=json_decode(@file_get_contents('data/bp.json'),true)?:[];
-$temp=json_decode(@file_get_contents('data/temperature.json'),true)?:[];
 $batt=json_decode(@file_get_contents('data/battery.json'),true)?:[];
 $alarms=json_decode(@file_get_contents('data/alarms.json'),true)?:[];
 $state=json_decode(@file_get_contents('data/_state.json'),true)?:[];
-
-$lastTemp=$temp?end($temp):null;
-$lastBatt=$batt?end($batt):null;
 
 $inactive = !empty($state['inactive']);
 $inactiveAge = (int)($state['inactive_age_s'] ?? 0);
@@ -22,6 +18,48 @@ function badge($on,$textOn,$textOff){
   $txt = $on ? $textOn : $textOff;
   return '<span style="display:inline-block;padding:6px 10px;border-radius:999px;color:#fff;background:'.$bg.';font-weight:600">'.$txt.'</span>';
 }
+
+function row_ts($row){
+  if(isset($row['ts'])) return (float)$row['ts'];
+  if(!empty($row['time'])){
+    $parsed = strtotime($row['time']);
+    if($parsed !== false) return (float)$parsed;
+  }
+  return null;
+}
+
+function normalize_rows($rows, $valueKeys, $maxRows = null){
+  $out = [];
+  $seen = [];
+  foreach($rows as $row){
+    if(!is_array($row)) continue;
+    $ts = row_ts($row);
+    if($ts === null) continue;
+    $keyParts = [$ts];
+    foreach($valueKeys as $key){
+      $keyParts[] = isset($row[$key]) ? (string)$row[$key] : '';
+    }
+    $dedupeKey = implode('|', $keyParts);
+    if(isset($seen[$dedupeKey])) continue;
+    $row['_ts'] = $ts;
+    $seen[$dedupeKey] = true;
+    $out[] = $row;
+  }
+  usort($out, function($a, $b){
+    if($a['_ts'] === $b['_ts']) return 0;
+    return ($a['_ts'] < $b['_ts']) ? -1 : 1;
+  });
+  if($maxRows !== null && count($out) > $maxRows){
+    $out = array_slice($out, -$maxRows);
+  }
+  return $out;
+}
+
+$bpmSeries = normalize_rows($bpm, ['bpm'], 120);
+$battSeries = normalize_rows($batt, ['battery'], 120);
+$bpSeries = normalize_rows($bp, ['sys','dia','bpm']);
+$lastBatt = $battSeries ? end($battSeries) : null;
+$bpTable = array_slice(array_reverse($bpSeries), 0, 10);
 ?><!doctype html><html><head><meta charset=utf-8>
 <title>ReachFar V48 — Dashboard</title>
 <script src=https://cdn.jsdelivr.net/npm/chart.js></script>
@@ -57,20 +95,13 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
       <div style="margin-top:10px"><small>Ultima: <?=$lastBatt['battery']?>% (<?=$lastBatt['time']?>)</small></div>
     <?php endif ?>
   </div>
-
-  <div class=card><h2>🌡️ Temperatura</h2>
-    <?php if($lastTemp): ?>
-      <div style="font-size:36px;font-weight:700"><?=$lastTemp['temp']?> °C</div>
-      <div><small><?=$lastTemp['time']?></small></div>
-    <?php else: ?>N/A<?php endif ?>
-  </div>
 </div>
 
 <div class=card style="margin-top:20px">
   <h2>🩸 Tensiune</h2>
   <table width=100%>
     <tr><th>Data</th><th>SYS</th><th>DIA</th><th>BPM</th></tr>
-    <?php foreach(array_slice(array_reverse($bp),0,10) as $r): ?>
+    <?php foreach($bpTable as $r): ?>
       <tr><td><?=$r['time']?></td><td><?=$r['sys']?></td><td><?=$r['dia']?></td><td><?=$r['bpm']?></td></tr>
     <?php endforeach ?>
   </table>
@@ -105,8 +136,8 @@ if (elBpm) {
     type: 'line',
     options: { spanGaps: true, scales: { x: { ticks: { maxTicksLimit: 6 } } } },
     data: {
-      labels: <?=json_encode(array_column($bpm,'time'))?>,
-      datasets: [{ label: 'BPM', data: <?=json_encode(array_column($bpm,'bpm'))?>, tension: .3 }]
+      labels: <?=json_encode(array_column($bpmSeries,'time'))?>,
+      datasets: [{ label: 'BPM', data: <?=json_encode(array_column($bpmSeries,'bpm'))?>, tension: .3 }]
     }
   });
 }
@@ -116,8 +147,8 @@ if (elBatt) {
     type: 'line',
     options: { spanGaps: true, scales: { x: { ticks: { maxTicksLimit: 6 } } } },
     data: {
-      labels: <?=json_encode(array_column($batt,'time'))?>,
-      datasets: [{ label: 'Battery %', data: <?=json_encode(array_column($batt,'battery'))?>, tension: .3 }]
+      labels: <?=json_encode(array_column($battSeries,'time'))?>,
+      datasets: [{ label: 'Battery %', data: <?=json_encode(array_column($battSeries,'battery'))?>, tension: .3 }]
     }
   });
 }
