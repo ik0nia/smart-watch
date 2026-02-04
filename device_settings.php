@@ -219,7 +219,6 @@ $lastPresets = $lastPresetsTs > 0 ? date('Y-m-d H:i', $lastPresetsTs) : 'N/A';
       <input type="hidden" name="action" value="send">
       <div class=stack>
         <button class=btn name="payload" value="hrtstart,1">Reforteaza BPM (hrtstart,1)</button>
-        <button class=btn name="payload" value="BODYTEMP2">Temperatura (BODYTEMP2)</button>
         <button class=btn name="payload" value="REMOVESMS,1">Alertare bratara (REMOVESMS,1)</button>
         <button class=btn name="payload" value="FALLDOWN,1,1">Detectie cadere (FALLDOWN,1,1)</button>
       </div>

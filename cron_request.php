@@ -43,8 +43,6 @@ if($needsBpm && $canSend){
   $stateDirty = true;
 }
 
-cmd('BODYTEMP2',$config);
-
 // Reaplica periodic setari (comenzi presetate)
 $presetsEnabled = !isset($config['device_presets_enabled']) || !empty($config['device_presets_enabled']);
 $presetsCooldown = (int)($config['device_presets_cooldown_s'] ?? 21600);
