@@ -1,0 +1,302 @@
+<?php
+declare(strict_types=1);
+
+return [
+    'base_url' => 'https://flespi.io',
+    'token' => getenv('FLESPI_TOKEN') ?: '',
+    'channel_id' => getenv('FLESPI_CHANNEL_ID') ?: '',
+    'device_id' => getenv('FLESPI_DEVICE_ID') ?: '',
+    'timezone' => 'Europe/Bucharest',
+    'freshness_seconds' => 900,
+    'api_timeout' => 20,
+    'auth' => [
+        'user' => getenv('APP_USER') ?: '',
+        'pass' => getenv('APP_PASS') ?: '',
+        'token' => getenv('APP_TOKEN') ?: '',
+    ],
+    'telemetry' => [
+        'source' => 'channel',
+        'limit' => 30,
+        'refresh_default' => 30,
+    ],
+    'debug' => [
+        'source' => 'channel',
+        'limit' => 200,
+    ],
+    'command' => [
+        'mode_default' => 'custom',
+        // Set to "queue" to use /commands-queue instead of /commands.
+        'queue_default' => 'immediate',
+        'timeout_default' => 30,
+        'dangerous_keywords' => ['FACTORY', 'RESET'],
+        // Optional presets (edit in config.local.php for real commands)
+        'presets' => [
+            [
+                'label' => 'Exemplu: solicitare status',
+                'payload' => 'STATUS',
+                'mode' => 'custom',
+                'queue' => 'immediate',
+                'description' => 'Trimite o solicitare de status către ceas.',
+            ],
+            [
+                'label' => 'Exemplu: setare interval raportare',
+                'payload' => 'UPLOAD,60',
+                'mode' => 'custom',
+                'queue' => 'immediate',
+                'description' => 'Setează intervalul de raportare la 60 secunde.',
+            ],
+            [
+                'label' => 'Exemplu: actualizare ora',
+                'payload' => 'TIME',
+                'mode' => 'custom',
+                'queue' => 'immediate',
+                'description' => 'Actualizează ora ceasului (ajustează payload-ul după doc).',
+            ],
+            [
+                'label' => 'Exemplu: WHERE',
+                'payload' => 'WHERE',
+                'mode' => 'custom',
+                'queue' => 'immediate',
+                'description' => 'Solicita o locatie imediata.',
+            ],
+            [
+                'label' => 'Exemplu: RESET (periculos)',
+                'payload' => 'RESET',
+                'mode' => 'custom',
+                'queue' => 'queue',
+                'dangerous' => true,
+                'description' => 'Reseteaza ceasul. Necesita confirmare.',
+            ],
+        ],
+    ],
+    'settings' => [
+        'sections' => [
+            [
+                'title' => 'Contacte si SOS',
+                'description' => 'Numere de urgenta si administrator (model Setracker 2).',
+                'icon' => 'sos',
+                'items' => [
+                    [
+                        'id' => 'sos_numbers',
+                        'label' => 'Numere SOS',
+                        'description' => 'Seteaza pana la 3 numere SOS pentru apel rapid.',
+                        'icon' => 'phone',
+                        'command_name' => 'custom',
+                        'payload_template' => 'SOS,{sos1},{sos2},{sos3}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            ['name' => 'sos1', 'label' => 'SOS 1', 'type' => 'text', 'placeholder' => '07...', 'required' => true],
+                            ['name' => 'sos2', 'label' => 'SOS 2', 'type' => 'text', 'placeholder' => '07...'],
+                            ['name' => 'sos3', 'label' => 'SOS 3', 'type' => 'text', 'placeholder' => '07...'],
+                        ],
+                    ],
+                    [
+                        'id' => 'center_number',
+                        'label' => 'Numar administrator',
+                        'description' => 'Numarul principal care administreaza ceasul.',
+                        'icon' => 'shield',
+                        'command_name' => 'custom',
+                        'payload_template' => 'CENTER,{center}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            ['name' => 'center', 'label' => 'Numar', 'type' => 'text', 'placeholder' => '07...', 'required' => true],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Retea si raportare',
+                'description' => 'APN si intervalul de raportare pentru date.',
+                'icon' => 'network',
+                'items' => [
+                    [
+                        'id' => 'apn',
+                        'label' => 'Setare APN',
+                        'description' => 'Completeaza APN-ul operatorului (plus user/parola daca exista).',
+                        'icon' => 'apn',
+                        'command_name' => 'custom',
+                        'payload_template' => 'APN,{apn},{user},{pass}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            ['name' => 'apn', 'label' => 'APN', 'type' => 'text', 'placeholder' => 'internet', 'required' => true],
+                            ['name' => 'user', 'label' => 'User', 'type' => 'text', 'placeholder' => ''],
+                            ['name' => 'pass', 'label' => 'Parola', 'type' => 'password', 'placeholder' => ''],
+                        ],
+                    ],
+                    [
+                        'id' => 'upload_interval',
+                        'label' => 'Interval raportare (sec)',
+                        'description' => 'La cat timp trimite ceasul date (secunde).',
+                        'icon' => 'timer',
+                        'command_name' => 'custom',
+                        'payload_template' => 'UPLOAD,{seconds}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            ['name' => 'seconds', 'label' => 'Secunde', 'type' => 'number', 'min' => 10, 'max' => 86400, 'default' => 60, 'required' => true],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Ora si limba',
+                'description' => 'Setari de fus orar si limba.',
+                'icon' => 'clock',
+                'items' => [
+                    [
+                        'id' => 'timezone',
+                        'label' => 'Fus orar',
+                        'description' => 'Offset fata de UTC (ex: +2 pentru Romania).',
+                        'icon' => 'clock',
+                        'command_name' => 'custom',
+                        'payload_template' => 'TIMEZONE,{offset}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            ['name' => 'offset', 'label' => 'UTC Offset', 'type' => 'text', 'placeholder' => '+2', 'default' => '+2', 'required' => true],
+                        ],
+                    ],
+                    [
+                        'id' => 'language',
+                        'label' => 'Limba',
+                        'description' => 'Selecteaza limba ceasului.',
+                        'icon' => 'list',
+                        'command_name' => 'custom',
+                        'payload_template' => 'LANGUAGE,{lang}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            [
+                                'name' => 'lang',
+                                'label' => 'Limba',
+                                'type' => 'select',
+                                'default' => 'RO',
+                                'options' => [
+                                    ['value' => 'RO', 'label' => 'Romana'],
+                                    ['value' => 'EN', 'label' => 'Engleza'],
+                                    ['value' => 'DE', 'label' => 'Germana'],
+                                    ['value' => 'FR', 'label' => 'Franceza'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Mod lucru si economisire',
+                'description' => 'Setari pentru consum si mod de functionare.',
+                'icon' => 'battery',
+                'items' => [
+                    [
+                        'id' => 'working_mode',
+                        'label' => 'Mod de lucru',
+                        'description' => 'Normal sau economisire. Verifica valorile exacte in documentatie.',
+                        'icon' => 'battery',
+                        'command_name' => 'custom',
+                        'payload_template' => 'MODE,{mode}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            [
+                                'name' => 'mode',
+                                'label' => 'Mod',
+                                'type' => 'select',
+                                'default' => '0',
+                                'options' => [
+                                    ['value' => '0', 'label' => 'Normal (0)'],
+                                    ['value' => '1', 'label' => 'Economisire (1)'],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'id' => 'auto_answer',
+                        'label' => 'Raspuns automat',
+                        'description' => 'Permite raspuns automat la apeluri.',
+                        'icon' => 'toggle',
+                        'command_name' => 'custom',
+                        'payload_template' => 'AUTOANSWER,{state}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            [
+                                'name' => 'state',
+                                'label' => 'Activare',
+                                'type' => 'select',
+                                'default' => '0',
+                                'options' => [
+                                    ['value' => '1', 'label' => 'Pornit (1)'],
+                                    ['value' => '0', 'label' => 'Oprit (0)'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Localizare si siguranta',
+                'description' => 'Optiuni legate de GPS/LBS.',
+                'icon' => 'location',
+                'items' => [
+                    [
+                        'id' => 'gps_switch',
+                        'label' => 'GPS pornit/oprit',
+                        'description' => 'Activeaza sau dezactiveaza GPS.',
+                        'icon' => 'location',
+                        'command_name' => 'custom',
+                        'payload_template' => 'GPS,{state}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            [
+                                'name' => 'state',
+                                'label' => 'GPS',
+                                'type' => 'select',
+                                'default' => '1',
+                                'options' => [
+                                    ['value' => '1', 'label' => 'Pornit (1)'],
+                                    ['value' => '0', 'label' => 'Oprit (0)'],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'id' => 'lbs_switch',
+                        'label' => 'LBS pornit/oprit',
+                        'description' => 'Activeaza localizarea LBS cand GPS nu este disponibil.',
+                        'icon' => 'signal',
+                        'command_name' => 'custom',
+                        'payload_template' => 'LBS,{state}',
+                        'format' => 'ascii',
+                        'append_crlf' => false,
+                        'timeout' => 30,
+                        'fields' => [
+                            [
+                                'name' => 'state',
+                                'label' => 'LBS',
+                                'type' => 'select',
+                                'default' => '1',
+                                'options' => [
+                                    ['value' => '1', 'label' => 'Pornit (1)'],
+                                    ['value' => '0', 'label' => 'Oprit (0)'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+];
