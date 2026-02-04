@@ -68,7 +68,7 @@ $bpTable = array_slice(array_reverse($bpSeries), 0, 10);
 <style>
 body{font-family:system-ui;background:#f4f6f8;padding:20px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
-.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);width:100%}
 h2{margin-top:0}
 small{color:#667}
 table{border-collapse:collapse}
@@ -78,7 +78,8 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
 .latest .label{font-size:12px;color:#667;text-transform:uppercase;letter-spacing:.04em}
 .latest .time{font-size:12px;color:#667}
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.chart{width:100%;height:220px}
+.chart-wrap{position:relative;width:100%;height:220px;max-height:220px}
+.chart{display:block;width:100% !important;height:100% !important}
 @media (max-width: 720px){
   body{padding:12px}
   .grid{grid-template-columns:1fr;gap:12px}
@@ -86,7 +87,7 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
   h2{font-size:18px}
   th,td{padding:6px}
   .latest .value{font-size:22px}
-  .chart{height:180px}
+  .chart-wrap{height:180px;max-height:180px}
 }
 </style></head><body>
 
@@ -115,7 +116,7 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
         <div class=time><?= htmlspecialchars($lastBpm['time']) ?></div>
       </div>
     <?php endif ?>
-    <canvas id=bpm class=chart></canvas>
+    <div class=chart-wrap><canvas id=bpm class=chart></canvas></div>
   </div>
 
   <div class=card><h2>🔋 Baterie</h2>
@@ -128,7 +129,7 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
         <div class=time><?= htmlspecialchars($lastBatt['time']) ?></div>
       </div>
     <?php endif ?>
-    <canvas id=batt class=chart></canvas>
+    <div class=chart-wrap><canvas id=batt class=chart></canvas></div>
     <?php if($lastBatt): ?>
       <div style="margin-top:6px"><small>Ultima: <?=$lastBatt['battery']?>% (<?=$lastBatt['time']?>)</small></div>
     <?php endif ?>
