@@ -1,0 +1,102 @@
+This AI assistant is familiar with the flespi platform and manufacturer’s documentation for the device and can answer any questions you have that are covered in any of them.
+It is capable of:
+
+Providing detailed information on how to use flespi platform.
+Providing detailed information on how to configure the ReachFar V48 device based on the device manual.
+Answering user questions related to the setup, configuration, and usage of the ReachFar V48 device with flespi.
+Sharing relevant links and resources from the device manual or flespi documentation to help you troubleshoot issues or optimize your device settings.
+Its limitations are:
+
+It does not have access to your device’s state, properties, or telemetry.
+It does not retain chat history between sessions.
+You
+Cum detectez daca ceas-ul e la mana, sau daca persoana a decedat?
+
+AI Assistant
+Dispozitivul ReachFar V48 are funcționalități care vă pot ajuta să detectați dacă ceasul este la mână și să monitorizați anumiți parametri fiziologici care ar putea indica o situație critică. Este important de menționat că, deși aceste funcții pot semnala evenimente grave, un dispozitiv telematic nu poate confirma în mod definitiv decesul unei persoane.
+
+Iată cum puteți detecta aceste aspecte:
+
+1. Detectarea scoaterii ceasului de la mână (brățară)
+ReachFar V48 este echipat cu o funcție de alertă pentru scoaterea brățării.
+
+Configurare pe dispozitiv:
+În comanda de configurare a funcțiilor dispozitivului (CONFIG), parametrul RR (Remove from hand alert) trebuie setat la 1 pentru a activa alerta.
+Puteți activa comanda de alertă prin SMS sau instrumentul de configurare al furnizorului, folosind comanda REMOVESMS,1. Dispozitivul va răspunde cu [SG*...*REMOVESMS].
+Monitorizare în mesajele dispozitivului:
+Starea terminalului este raportată printr-un câmp hexazecimal. Bitul 20 din acest câmp indică "bracelet removal alarm" (alarmă de scoatere a brățării). Când acest bit este activ, în mesajele procesate de flespi, veți vedea un parametru corespunzător (de exemplu, alarm.bracelet_removal sau similar) setat la true.
+Detectare în flespi:
+Puteți crea un calculator în flespi cu un selector de tip expresie care să monitorizeze schimbarea stării parametrului alarm.bracelet_removal (sau numele exact al parametrului de scoatere a brățării, așa cum este parsate de protocolul ReachFar).
+Odată ce calculatorul detectează o schimbare, puteți primi notificări în timp real prin abonarea la topicul MQTT flespi/interval/gw/calcs/{calculator-id}/devices/+/activated sau flespi/interval/gw/calcs/{calculator-id}/devices/+/deactivated.
+2. Detectarea unei situații critice (care ar putea indica decesul)
+ReachFar V48 oferă mai multe funcții care pot servi drept indicatori pentru o situație critică:
+
+Detectarea căderii (Falldown alarm):
+Configurare pe dispozitiv: Parametrul FL (Fall detection) în comanda CONFIG trebuie activat. De asemenea, puteți activa alarma de cădere cu comanda FALLDOWN,1,1 și seta nivelul de sensibilitate cu LSSET,5+6.
+Monitorizare în mesajele dispozitivului: Bitul 21 din câmpul "State of the terminal" indică "fall alarm". În mesajele flespi, acest lucru se va traduce într-un parametru (de exemplu, alarm.fall) setat la true.
+Detectare în flespi: Similar cu detectarea scoaterii brățării, un calculator poate fi configurat pentru a detecta când alarm.fall devine true și a trimite notificări.
+Un exemplu de configurare a calculatorului pentru detectarea butonului de panică (care poate fi adaptat pentru alarme de cădere) este disponibil în cunoștințele noastre, folosind expresii precum $sos.alarm == true sau $alarm.event == true && $event.code == "SOS". Puteți adapta această logică pentru alarm.fall.
+Monitorizarea parametrilor fiziologici (ritm cardiac, tensiune arterială, oxigen, temperatură):
+Configurare pe dispozitiv: Parametrii HR (Heart Rate), TB (Blood Pressure) și BO (Body temperature) din comanda CONFIG trebuie activați. Puteți solicita datele de ritm cardiac și tensiune arterială cu comanda hrtstart,1. Dispozitivul va trimite mesaje cu bphrt (tensiune arterială, ritm cardiac) și oxygen (oxigen). Pentru temperatură, folosiți comenzi precum BODYTEMP2 sau BODYTEMP,1,1.
+Monitorizare în mesajele dispozitivului: Aceste date vor apărea în mesajele flespi ca parametri precum heart.rate, blood.pressure.systolic, blood.pressure.diastolic, blood.oxygen.level și body.temperature.
+Detectare în flespi: Puteți utiliza telemetria dispozitivului pentru a accesa cele mai recente valori ale acestor parametri. De asemenea, calculatoarele pot fi configurate pentru a detecta valori anormale (de exemplu, ritm cardiac zero sau temperatură extrem de scăzută/ridicată) sau lipsa datelor pentru o perioadă prelungită.
+Inactivitate prelungită:
+Detectare în flespi: Un calculator cu un selector de interval de tip "inactive" poate detecta perioadele în care dispozitivul nu trimite mesaje pentru o durată specificată (indicând lipsa de mișcare sau pierderea conexiunii). Acest lucru poate fi un indicator indirect al unei probleme.
+Rețineți:
+
+Pentru a configura dispozitivul, veți avea nevoie de un canal ReachFar creat în flespi și de un dispozitiv înregistrat cu IMEI-ul de 15 caractere.
+Verificați întotdeauna logurile și mesajele dispozitivului în flespi pentru a vă asigura că parametrii sunt primiți și parsati corect.
+Pentru orice întrebări legate de datele specifice ale contului dvs. sau pentru o analiză a datelor în timp real, vă sugerez să discutați cu Codi, celălalt asistent AI flespi, care are acces la datele contului dvs.
+Enter your request here
+
+
+This AI assistant is familiar with the flespi platform and manufacturer’s documentation for the device and can answer any questions you have that are covered in any of them.
+It is capable of:
+
+Providing detailed information on how to use flespi platform.
+Providing detailed information on how to configure the ReachFar V48 device based on the device manual.
+Answering user questions related to the setup, configuration, and usage of the ReachFar V48 device with flespi.
+Sharing relevant links and resources from the device manual or flespi documentation to help you troubleshoot issues or optimize your device settings.
+Its limitations are:
+
+It does not have access to your device’s state, properties, or telemetry.
+It does not retain chat history between sessions.
+You
+Cum detectez daca ceas-ul e la mana, sau daca persoana a decedat?
+
+AI Assistant
+Dispozitivul ReachFar V48 are funcționalități care vă pot ajuta să detectați dacă ceasul este la mână și să monitorizați anumiți parametri fiziologici care ar putea indica o situație critică. Este important de menționat că, deși aceste funcții pot semnala evenimente grave, un dispozitiv telematic nu poate confirma în mod definitiv decesul unei persoane.
+
+Iată cum puteți detecta aceste aspecte:
+
+1. Detectarea scoaterii ceasului de la mână (brățară)
+ReachFar V48 este echipat cu o funcție de alertă pentru scoaterea brățării.
+
+Configurare pe dispozitiv:
+În comanda de configurare a funcțiilor dispozitivului (CONFIG), parametrul RR (Remove from hand alert) trebuie setat la 1 pentru a activa alerta.
+Puteți activa comanda de alertă prin SMS sau instrumentul de configurare al furnizorului, folosind comanda REMOVESMS,1. Dispozitivul va răspunde cu [SG*...*REMOVESMS].
+Monitorizare în mesajele dispozitivului:
+Starea terminalului este raportată printr-un câmp hexazecimal. Bitul 20 din acest câmp indică "bracelet removal alarm" (alarmă de scoatere a brățării). Când acest bit este activ, în mesajele procesate de flespi, veți vedea un parametru corespunzător (de exemplu, alarm.bracelet_removal sau similar) setat la true.
+Detectare în flespi:
+Puteți crea un calculator în flespi cu un selector de tip expresie care să monitorizeze schimbarea stării parametrului alarm.bracelet_removal (sau numele exact al parametrului de scoatere a brățării, așa cum este parsate de protocolul ReachFar).
+Odată ce calculatorul detectează o schimbare, puteți primi notificări în timp real prin abonarea la topicul MQTT flespi/interval/gw/calcs/{calculator-id}/devices/+/activated sau flespi/interval/gw/calcs/{calculator-id}/devices/+/deactivated.
+2. Detectarea unei situații critice (care ar putea indica decesul)
+ReachFar V48 oferă mai multe funcții care pot servi drept indicatori pentru o situație critică:
+
+Detectarea căderii (Falldown alarm):
+Configurare pe dispozitiv: Parametrul FL (Fall detection) în comanda CONFIG trebuie activat. De asemenea, puteți activa alarma de cădere cu comanda FALLDOWN,1,1 și seta nivelul de sensibilitate cu LSSET,5+6.
+Monitorizare în mesajele dispozitivului: Bitul 21 din câmpul "State of the terminal" indică "fall alarm". În mesajele flespi, acest lucru se va traduce într-un parametru (de exemplu, alarm.fall) setat la true.
+Detectare în flespi: Similar cu detectarea scoaterii brățării, un calculator poate fi configurat pentru a detecta când alarm.fall devine true și a trimite notificări.
+Un exemplu de configurare a calculatorului pentru detectarea butonului de panică (care poate fi adaptat pentru alarme de cădere) este disponibil în cunoștințele noastre, folosind expresii precum $sos.alarm == true sau $alarm.event == true && $event.code == "SOS". Puteți adapta această logică pentru alarm.fall.
+Monitorizarea parametrilor fiziologici (ritm cardiac, tensiune arterială, oxigen, temperatură):
+Configurare pe dispozitiv: Parametrii HR (Heart Rate), TB (Blood Pressure) și BO (Body temperature) din comanda CONFIG trebuie activați. Puteți solicita datele de ritm cardiac și tensiune arterială cu comanda hrtstart,1. Dispozitivul va trimite mesaje cu bphrt (tensiune arterială, ritm cardiac) și oxygen (oxigen). Pentru temperatură, folosiți comenzi precum BODYTEMP2 sau BODYTEMP,1,1.
+Monitorizare în mesajele dispozitivului: Aceste date vor apărea în mesajele flespi ca parametri precum heart.rate, blood.pressure.systolic, blood.pressure.diastolic, blood.oxygen.level și body.temperature.
+Detectare în flespi: Puteți utiliza telemetria dispozitivului pentru a accesa cele mai recente valori ale acestor parametri. De asemenea, calculatoarele pot fi configurate pentru a detecta valori anormale (de exemplu, ritm cardiac zero sau temperatură extrem de scăzută/ridicată) sau lipsa datelor pentru o perioadă prelungită.
+Inactivitate prelungită:
+Detectare în flespi: Un calculator cu un selector de interval de tip "inactive" poate detecta perioadele în care dispozitivul nu trimite mesaje pentru o durată specificată (indicând lipsa de mișcare sau pierderea conexiunii). Acest lucru poate fi un indicator indirect al unei probleme.
+Rețineți:
+
+Pentru a configura dispozitivul, veți avea nevoie de un canal ReachFar creat în flespi și de un dispozitiv înregistrat cu IMEI-ul de 15 caractere.
+Verificați întotdeauna logurile și mesajele dispozitivului în flespi pentru a vă asigura că parametrii sunt primiți și parsati corect.
+Pentru orice întrebări legate de datele specifice ale contului dvs. sau pentru o analiză a datelor în timp real, vă sugerez să discutați cu Codi, celălalt asistent AI flespi, care are acces la datele contului dvs.
+Enter your request here
