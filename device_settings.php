@@ -59,6 +59,10 @@ $dataDir = $config['data_dir'] ?? (__DIR__.'/data');
 $dataDir = rtrim($dataDir,'/');
 $stateFile = $dataDir.'/_state.json';
 $state = load_json($stateFile);
+$presetsFile = $dataDir.'/device_presets.json';
+$presets = load_json($presetsFile);
+if(!is_array($presets)) $presets = [];
+$presetsText = implode("\n", $presets);
 
 $bpmLast = last_row(load_json($dataDir.'/bpm.json'));
 $spo2Last = last_row(load_json($dataDir.'/spo2.json'));
@@ -109,12 +113,29 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
       }
     }
   }
+
+  if($action === 'save_presets'){
+    $raw = trim($_POST['preset_payloads'] ?? '');
+    $lines = $raw === '' ? [] : preg_split("/\r\n|\n|\r/", $raw);
+    $out = [];
+    foreach($lines as $line){
+      $line = trim($line);
+      if($line === '') continue;
+      $out[] = $line;
+    }
+    @file_put_contents($presetsFile, json_encode($out, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE));
+    $presets = $out;
+    $presetsText = implode("\n", $presets);
+    $notices[] = ['type'=>'ok','text'=>'Preseturi salvate. Vor fi reaplicate automat de cron_request.php.'];
+  }
 }
 
 $lastMsgTs = (int)($state['last_msg_ts'] ?? 0);
 $lastMsg = $lastMsgTs > 0 ? date('Y-m-d H:i', $lastMsgTs) : 'N/A';
 $lastBpmTs = isset($state['last_bpm_ts']) ? (int)$state['last_bpm_ts'] : 0;
 $bpmAge = $lastBpmTs > 0 ? (time() - $lastBpmTs) : null;
+$lastPresetsTs = isset($state['presets_last']) ? (int)$state['presets_last'] : 0;
+$lastPresets = $lastPresetsTs > 0 ? date('Y-m-d H:i', $lastPresetsTs) : 'N/A';
 ?><!doctype html>
 <html>
 <head>
@@ -185,6 +206,10 @@ $bpmAge = $lastBpmTs > 0 ? (time() - $lastBpmTs) : null;
         <div class=label>BPM age</div>
         <div class=value><?= $bpmAge !== null ? (int)($bpmAge/60).' min' : 'N/A' ?></div>
       </div>
+      <div class=latest>
+        <div class=label>Ultimele preseturi</div>
+        <div class=value><?= htmlspecialchars($lastPresets) ?></div>
+      </div>
     </div>
   </div>
 
@@ -220,6 +245,18 @@ $bpmAge = $lastBpmTs > 0 ? (time() - $lastBpmTs) : null;
       <textarea name="payloads" rows="6" placeholder="CONFIG,...&#10;REMOVESMS,1&#10;FALLDOWN,1,1"></textarea>
       <div style="margin-top:8px">
         <button class=btn type="submit">Trimite comenzi</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Preseturi dispozitiv (reaplicate periodic)</h2>
+    <p><small>Comenzile de mai jos se trimit automat din cron_request.php la intervalul setat in config.php.</small></p>
+    <form method="post">
+      <input type="hidden" name="action" value="save_presets">
+      <textarea name="preset_payloads" rows="6" placeholder="CONFIG,HR=1,BO=1,HF=1&#10;SOS,1,07xxxxxxxx"><?=htmlspecialchars($presetsText)?></textarea>
+      <div style="margin-top:8px">
+        <button class=btn type="submit">Salveaza preseturi</button>
       </div>
     </form>
   </div>
