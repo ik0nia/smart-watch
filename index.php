@@ -58,11 +58,14 @@ function normalize_rows($rows, $valueKeys, $maxRows = null){
 $bpmSeries = normalize_rows($bpm, ['bpm'], 120);
 $battSeries = normalize_rows($batt, ['battery'], 120);
 $bpSeries = normalize_rows($bp, ['sys','dia','bpm']);
+$alarmsSeries = normalize_rows($alarms, ['type','value','age_s']);
 $lastBpm = $bpmSeries ? end($bpmSeries) : null;
 $lastBatt = $battSeries ? end($battSeries) : null;
 $lastBp = $bpSeries ? end($bpSeries) : null;
 $bpTable = array_slice(array_reverse($bpSeries), 0, 10);
+$alarmTable = array_slice(array_reverse($alarmsSeries), 0, 15);
 ?><!doctype html><html><head><meta charset=utf-8>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ReachFar V48 — Dashboard</title>
 <script src=https://cdn.jsdelivr.net/npm/chart.js></script>
 <style>
@@ -165,7 +168,7 @@ th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
   <h2>🚨 Ultimele alarme</h2>
   <table width=100%>
     <tr><th>Data</th><th>Tip</th><th>Detalii</th></tr>
-    <?php foreach(array_slice(array_reverse($alarms),0,15) as $a): ?>
+    <?php foreach($alarmTable as $a): ?>
       <tr>
         <td><?=htmlspecialchars($a['time'] ?? '')?></td>
         <td><?=htmlspecialchars($a['type'] ?? '')?></td>

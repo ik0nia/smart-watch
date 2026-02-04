@@ -188,6 +188,7 @@ foreach($msgs as $m){
   $hasSpo2 = (isset($m['blood.oxygen.saturation']) && (int)$m['blood.oxygen.saturation'] > 0) ||
     (isset($m['blood.oxygen.level']) && (int)$m['blood.oxygen.level'] > 0);
   $hasVitals = $hasBpm || $hasBp || $hasSpo2;
+  $braceletAlarmAdded = false;
 
   // --- vitale ---
   if($hasBpm && $ts > (float)($state['last_bpm_ts'] ?? 0)){
@@ -246,13 +247,14 @@ Eveniment: Wristband disconnected
 ");
     }
     add_row($alarmsFile, ['time'=>$t,'type'=>'bracelet_removal','value'=>true,'ts'=>$ts], $maxRows);
+    $braceletAlarmAdded = true;
   }
 
   $state['bracelet_state'] = $isRemoved ? true : false;
   }
 
 // --- fallback: alarm.bracelet_removal / alarm.fall dacă apar în messages ---
-  if(!empty($m[$fieldBracelet]) && !$hasVitals){
+  if(!$braceletAlarmAdded && !empty($m[$fieldBracelet]) && !$hasVitals){
     $now=time(); $last=(int)($state['bracelet_last'] ?? 0);
     if($now-$last > $braceletCooldown){
       $state['bracelet_last']=$now;
@@ -262,6 +264,7 @@ Eveniment: Bracelet removal
 ");
     }
     add_row($alarmsFile, ['time'=>$t,'type'=>'bracelet_removal','value'=>true,'ts'=>$ts], $maxRows);
+    $braceletAlarmAdded = true;
     $state['bracelet_state'] = true;
   }
 

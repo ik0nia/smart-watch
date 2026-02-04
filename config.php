@@ -29,6 +29,10 @@ return [
 'inactive_threshold_s' => 900,   // 15 min
 'inactive_cooldown_s'  => 3600,  // 1h între alerte
 
+// ---- Cerere BPM dacă nu sunt date recente ----
+'bpm_request_threshold_s' => 900, // 15 min fără BPM => trimite hrtstart,1
+'bpm_request_cooldown_s'  => 300, // 5 min între comenzi
+
 // ---- Cooldown pe alarme ----
 'bracelet_cooldown_s' => 3600,
 'fall_cooldown_s'     => 3600,
